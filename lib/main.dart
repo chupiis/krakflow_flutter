@@ -4,18 +4,23 @@ void main() {
   runApp(MyApp());
 }
 
+
+
 class MyApp extends StatelessWidget {
 
 
   List<Task> tasks = [
-    Task(title: "HTML/CSS", deadline: "dzisiaj"),
-    Task(title: "Python", deadline: "2 dni"),
-    Task(title: "Java", deadline: "w nastepnym tygodniu"),
-    Task(title: "C++", deadline: "jutro"),
+    Task(title: "HTML/CSS", deadline: "dzisiaj", done: true, priority: "wysoki"),
+    Task(title: "Python", deadline: "2 dni", done: true, priority: "sredni"),
+    Task(title: "Java", deadline: "w nastepnym tygodniu", done: false, priority: "niski"),
+    Task(title: "C++", deadline: "jutro", done: false, priority: "wysoki"),
   ];
+
 
   @override
   Widget build(BuildContext context) {
+    int doneCount = tasks.where((task) => task.done).length;
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text("KrakFlow")),
@@ -25,7 +30,14 @@ class MyApp extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("Masz dzis ${tasks.length} zadania"),
+                  Text("Masz dzis ${tasks.length} zadania | wykonane: $doneCount"),
+                  Text(
+                    "Dzisiejsze zadania",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               ListView.builder(
@@ -35,37 +47,11 @@ class MyApp extends StatelessWidget {
                   itemBuilder: (context, index){
                     final task = tasks[index];
                     return TaskCard(title: task.title,
-                        subtitle: task.deadline,
-                        icon: Icons.ice_skating);
+                        subtitle: "${task.deadline}, ${task.priority}",
+                        icon: task.done
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked);
                   }
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                Text(
-                  "Dzisiejsze zadania",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ]
-              ),
-              TaskCard(title: tasks[0].title,
-                subtitle: "Hello",
-                icon: Icons.face,
-              ),
-              TaskCard(title: tasks[1].title,
-                subtitle: "Hello",
-                icon: Icons.face_2,
-              ),
-              TaskCard(title: tasks[2].title,
-                subtitle: "Hello",
-                icon: Icons.face_3,
-              ),
-              TaskCard(title: tasks[3].title,
-                subtitle: "Hello",
-                icon: Icons.face_4,
               ),
             ],
           ),
@@ -79,8 +65,9 @@ class Task {
   final String title;
   final String deadline;
   final bool done;
+  final String priority;
 
-  Task({required this.title, required this.deadline, required this.done});
+  Task({required this.title, required this.deadline, required this.done, required this.priority});
 }
 
 class TaskCard extends StatelessWidget {
