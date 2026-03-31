@@ -65,13 +65,19 @@ class _HomeScreenState extends State<HomeScreen>{
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final Task? newTask = await Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => AddTaskScreen(),
             ),
           );
+
+          if (newTask != null) {
+            setState(() {
+              TaskRepository.tasks.add(newTask);
+            });
+          }
         },
         child: Icon(Icons.add),
       ),
@@ -143,9 +149,8 @@ class AddTaskScreen extends StatelessWidget {
                   priority: priority,
                 );
 
-                TaskRepository.tasks.add(newTask);
 
-                Navigator.pop(context);
+                Navigator.pop(context, newTask);
               },
             child: Text("Zapisz"),
           ),
