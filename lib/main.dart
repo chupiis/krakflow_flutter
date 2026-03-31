@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'task_repository.dart';
 
 void main() {
   runApp(MyApp());
@@ -7,67 +8,152 @@ void main() {
 
 
 class MyApp extends StatelessWidget {
-
-
-  List<Task> tasks = [
-    Task(title: "HTML/CSS", deadline: "dzisiaj", done: true, priority: "wysoki"),
-    Task(title: "Python", deadline: "2 dni", done: true, priority: "sredni"),
-    Task(title: "Java", deadline: "w nastepnym tygodniu", done: false, priority: "niski"),
-    Task(title: "C++", deadline: "jutro", done: false, priority: "wysoki"),
-  ];
-
-
   @override
   Widget build(BuildContext context) {
-    int doneCount = tasks.where((task) => task.done).length;
-
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text("KrakFlow")),
-        body: Center(
-          child: ListView(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text("Masz dzis ${tasks.length} zadania | wykonane: $doneCount"),
-                  Text(
-                    "Dzisiejsze zadania",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+      home: HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen>{
+  @override
+  Widget build(BuildContext context){
+
+    int doneCount = TaskRepository.tasks.where((task) => task.done).length;
+
+    return Scaffold(
+      appBar: AppBar(title: Text("KrakFlow")),
+      body: Center(
+        child: ListView(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text("Masz dzis ${TaskRepository.tasks.length} zadania | wykonane: $doneCount"),
+                Text(
+                  "Dzisiejsze zadania",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-              ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: tasks.length,
-                  itemBuilder: (context, index){
-                    final task = tasks[index];
-                    return TaskCard(title: task.title,
-                        subtitle: "${task.deadline}, ${task.priority}",
-                        icon: task.done
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked);
-                  }
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: TaskRepository.tasks.length,
+              itemBuilder: (context, index) {
+                final task = TaskRepository.tasks[index];
+                return TaskCard(
+                  title: task.title,
+                  subtitle: "${task.deadline} | ${task.priority}",
+                  icon: task.done
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                );
+              },
+            ),
+          ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => AddTaskScreen(),
+            ),
+          );
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
 }
 
-class Task {
-  final String title;
-  final String deadline;
-  final bool done;
-  final String priority;
+class AddTaskScreen extends StatelessWidget {
 
-  Task({required this.title, required this.deadline, required this.done, required this.priority});
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController deadlineController = TextEditingController();
+  String priority = "sredni";
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Nowe zadanie"),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(
+                labelText: "Tytul zadania",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+              SizedBox(height: 12),
+
+            TextField(
+              controller: deadlineController,
+              decoration: InputDecoration(
+                labelText: "Termin (np. jutro)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+              SizedBox(height: 12),
+
+            DropdownButtonFormField<String>(
+              value: priority,
+              items: ["niski", "sredni", "wysoki"]
+                  .map((p) => DropdownMenuItem(
+                value: p,
+                child: Text(p),
+              ))
+                  .toList(),
+              onChanged: (value) {
+                priority = value!;
+              },
+              decoration: InputDecoration(
+                labelText: "Priorytet",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+          ElevatedButton(
+              onPressed: () {
+
+                final newTask = Task(
+                  title: titleController.text,
+                  deadline: deadlineController.text,
+                  done: false,
+                  priority: priority,
+                );
+
+                TaskRepository.tasks.add(newTask);
+
+                Navigator.pop(context);
+              },
+            child: Text("Zapisz"),
+          ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class TaskCard extends StatelessWidget {
