@@ -12,10 +12,10 @@ class TaskRepository {
 }
 
 class Task {
-  final String title;
-  final String deadline;
-  final bool done;
-  final String priority;
+  String title;
+  String deadline;
+  bool done;
+  String priority;
 
   Task({required this.title, required this.deadline, required this.done, required this.priority});
 }
